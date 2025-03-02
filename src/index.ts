@@ -9,7 +9,7 @@ app.get("/", async (req,res)=>{
     const users = await client.user.findMany()
 
     res.json({
-        status:"supper dupper success1",
+        status:"supper dupper success2",
         users
     })
 })
