@@ -1,0 +1,39 @@
+name: "ci-pipeline"
+
+on:
+    push:
+        branches:
+            - main
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+            -   name: deploy
+                uses: appleboy/ssh-action@v1.2.0
+                with:
+                    host: ${{secrets.HOST}}
+                    username: ${{secrets.USER}}
+                    key: ${{secrets.SSH_KEY}}
+                    script: |
+                        export NVM_DIR="$HOME/.nvm"
+                        source "$NVM_DIR/nvm.sh"
+                        nvm use 22
+                        cd ~/normal-app
+                        git pull origin main
+                        npx prisma generate
+                        npm install
+                        DATABASE_URL=p${{secrets.DB_URL}} pm2 restart norma-app
+
+
+
+
+            
+
+
+
+
+
+
+
