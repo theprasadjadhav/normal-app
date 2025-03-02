@@ -19,7 +19,7 @@ const client = new client_1.PrismaClient();
 app.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const users = yield client.user.findMany();
     res.json({
-        status: "supper dupper success",
+        status: "supper dupper success1",
         users
     });
 }));
