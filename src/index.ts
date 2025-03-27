@@ -9,7 +9,7 @@ app.get("/", async (req,res)=>{
     const users = await client.user.findMany()
 
     res.json({
-        status:"supper dupper success2",
+        status:"supper dupper success 3",
         users
     })
 })
@@ -23,7 +23,7 @@ app.post("/",async (req,res)=>{
         }
     })
 
-    res.send("user created sucessfully")
+    res.send("user created very sucessfully")
 
 })
 
