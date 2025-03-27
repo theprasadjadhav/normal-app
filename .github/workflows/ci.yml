@@ -5,35 +5,65 @@ on:
         branches:
             - main
 
+# jobs:
+#     deploy:
+#         runs-on: ubuntu-latest
+
+#         steps:
+#             -   name: deploy
+#                 uses: appleboy/ssh-action@v1.2.0
+#                 with:
+#                     host: ${{secrets.HOST}}
+#                     username: ${{secrets.USER}}
+#                     key: ${{secrets.SSH_KEY}}
+#                     script: |
+#                         export NVM_DIR="$HOME/.nvm"
+#                         source "$NVM_DIR/nvm.sh"
+#                         nvm use 22
+#                         cd ~/normal-app
+#                         git pull origin main
+#                         npx prisma generate
+#                         npm install --production
+#                         export DATABASE_URL=${{secrets.DB_URL}}         # sets DATABASE_URL as env variable if set directlly with pm2 command it will not be available in pm2 restart
+#                         pm2 restart norma-app --update-env              # --update-env will load env variables if server dies and restarts without this it will not find db-url on server restart
+
+
+
 jobs:
-    build:
-        runs-on: ubuntu-latest
+  deploy:
+    runs-on: ubuntu-latest
 
-        steps:
-            -   name: deploy
-                uses: appleboy/ssh-action@v1.2.0
-                with:
-                    host: ${{secrets.HOST}}
-                    username: ${{secrets.USER}}
-                    key: ${{secrets.SSH_KEY}}
-                    script: |
-                        export NVM_DIR="$HOME/.nvm"
-                        source "$NVM_DIR/nvm.sh"
-                        nvm use 22
-                        cd ~/normal-app
-                        git pull origin main
-                        npx prisma generate
-                        npm install
-                        DATABASE_URL=p${{secrets.DB_URL}} pm2 restart norma-app
+    steps:
 
+      - name: checkout code
+        uses: actions/checkout@v4
 
+      - name: deploy login
+        uses: docker/login-action@v3
+        with:
+            username: ${{secrets.DOCKER_USERNAME}}
+            password: ${{secrets.DOCKER_PASSWORD}}
 
+      - name: build and push docker image
+        uses: docker/build-push-action@v6
+        with:
+            context: .
+            push: true
+            tags: prasadev/normal-app:latest
 
-            
-
-
-
-
-
-
-
+      - name: deploy to server
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            docker pull prasadev/normal-app:latest
+            docker stop node-app || true
+            docker rm node-app || true
+            docker run -d \
+              -p 80:3000 \
+              --name node-app \
+              --env DATABASE_URL="${{ secrets.DB_URL }}" \
+              --restart unless-stopped \
+              prasadev/normal-app:latest

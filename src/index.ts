@@ -14,7 +14,7 @@ app.get("/", async (req,res)=>{
     })
 })
 
-app .post("/",async (req,res)=>{
+app.post("/",async (req,res)=>{
 
     await client.user.create({
         data:{
