@@ -58,12 +58,12 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            docker pull prasadev/normal-app:latest
-            docker stop node-app || true
-            docker rm node-app || true
-            docker run -d \
+            sudo docker pull ${{secrets.DOCKER_USERNAME}}/normal-app:latest
+            sudo docker stop node-app || true
+            sudo docker rm node-app || true
+            sudo docker run -d \
               -p 80:3000 \
               --name node-app \
               --env DATABASE_URL="${{ secrets.DB_URL }}" \
               --restart unless-stopped \
-              prasadev/normal-app:latest
+              ${{secrets.DOCKER_USERNAME}}/normal-app:latest
